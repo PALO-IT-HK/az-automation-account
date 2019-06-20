@@ -1,0 +1,56 @@
+{
+  "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "name": {
+      "type": "string"
+    },
+    "location": {
+      "type": "string"
+    },
+    "username": {
+      "type": "string"
+    },
+    "password": {
+      "type": "securestring"
+    }
+  },
+  "variables": {},
+  "resources": [
+    {
+      "name": "concat(parameters('name'), '-aa')",
+      "type": "Microsoft.Automation/automationAccounts",
+      "apiVersion": "2015-10-31",
+      "properties": {
+        "sku": {
+          "name": "Basic"
+        }
+      },
+      "location": "parameters('location')",
+      "tags": {}
+    },
+    {
+      "name": "concat(parameters('name'), '-cred')",
+      "type": "Microsoft.Automation/automationAccounts/credentials",
+      "apiVersion": "2015-10-31",
+      "properties": {
+        "userName": "parameters('username')",
+        "password": "parameters('password')",
+        "description": ""
+      }
+    },
+    {
+      "name": "string",
+      "type": "Microsoft.Automation/automationAccounts/connections",
+      "apiVersion": "2015-10-31",
+      "properties": {
+        "description": "",
+        "connectionType": {
+          "name": "Azure"
+        },
+        "fieldDefinitionValues": {}
+      }
+    }
+  ],
+  "outputs": {}
+}
