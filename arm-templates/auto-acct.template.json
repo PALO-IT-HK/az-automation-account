@@ -30,7 +30,7 @@
       "tags": {}
     },
     {
-      "name": "concat(parameters('name'), '-cred')",
+      "name": "concat(parameters('name'), 'cred')",
       "type": "Microsoft.Automation/automationAccounts/credentials",
       "apiVersion": "2015-10-31",
       "properties": {
