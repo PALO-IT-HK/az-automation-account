@@ -1,0 +1,28 @@
+trigger:
+- master
+
+pool:
+  name: Hosted VS2017
+
+steps:
+- powershell: |
+    Install-PackageProvider -Name NuGet -Force -Verbose -Scope CurrentUser
+    Install-Module -Name PSScriptAnalyzer -Force -Verbose -Scope CurrentUser
+    Invoke-ScriptAnalyzer -Path ./src -Setting PSGallery -Recurse
+  displayName: Analyse scripts coding quality
+
+- task: AzureFileCopy@2
+  displayName: Upload script to Storage Artifact Store
+  inputs:
+    sourcePath: runbooks/startstopvms.ps1
+    azureSubscription: PALO IT Sandbox
+    destination: azureBlob
+    storage: coachingdeploy001
+    containerName: devops
+    blobPrefix: startstopvms/$(Build.SourceBranchName)/$(Build.SourceVersion)/
+
+- task: PublishBuildArtifacts@1
+  displayName: Publish Build Artifact for ARM Templates
+  inputs:
+    pathtoPublish: $(Build.SourcesDirectory)/arm-templates
+    artifactName: 'arm-template'
