@@ -1,0 +1,8 @@
+{
+  "subscriptionId": "",
+  "resourceGroupName": "",
+  "location": "",
+  "deploymentName": "",
+  "templateFilePath": "./arm-templates/auto-acct.template.json",
+  "parametersFilePath": "./arm-templates/auto-acct.parameters.json"
+}

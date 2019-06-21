@@ -2,7 +2,7 @@
   "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
   "contentVersion": "1.0.0.0",
   "parameters": {
-    "name": {
+    "aaName": {
       "type": "string"
     },
     "location": {
@@ -18,7 +18,7 @@
   "variables": {},
   "resources": [
     {
-      "name": "concat(parameters('name'), '-aa')",
+      "name": "[parameters('aaName')]",
       "type": "Microsoft.Automation/automationAccounts",
       "apiVersion": "2015-10-31",
       "properties": {
@@ -26,29 +26,95 @@
           "name": "Basic"
         }
       },
-      "location": "parameters('location')",
+      "location": "[parameters('location')]",
       "tags": {}
     },
     {
-      "name": "concat(parameters('name'), 'cred')",
+      "name": "[concat(parameters('aaName'), '/cred')]",
       "type": "Microsoft.Automation/automationAccounts/credentials",
       "apiVersion": "2015-10-31",
+      "dependsOn": [
+        "[parameters('aaName')]"
+      ],
       "properties": {
-        "userName": "parameters('username')",
-        "password": "parameters('password')",
+        "userName": "[parameters('username')]",
+        "password": "[parameters('password')]",
         "description": ""
       }
     },
     {
-      "name": "string",
+      "name": "[concat(parameters('aaName'), '/connection')]",
       "type": "Microsoft.Automation/automationAccounts/connections",
       "apiVersion": "2015-10-31",
+      "dependsOn": [
+        "[parameters('aaName')]"
+      ],
       "properties": {
         "description": "",
         "connectionType": {
           "name": "Azure"
         },
-        "fieldDefinitionValues": {}
+        "fieldDefinitionValues": {
+          "AutomationCertificateName": "[concat(parameters('aaName'), '/cred')]",
+          "SubscriptionID": "subscription().subscriptionId"
+        }
+      }
+    },
+    {
+      "type": "Microsoft.Automation/automationAccounts/runbooks",
+      "apiVersion": "2015-10-31",
+      "name": "[concat(parameters('aaName'), '/', parameters('runbookName'))]",
+      "location": "[parameters('location')]",
+      "dependsOn": [
+        "[parameters('aaName')]"
+      ],
+      "properties": {
+        "logVerbose": true,
+        "logProgress": true,
+        "logActivityTrace": 0,
+        "runbookType": "PowerShell",
+        "description": "[parameters('runbookDescription')]",
+        "publishContentLink": {
+          "uri": "[parameters('runbookURI')]",
+          "version": "1.0.0.0"
+        }
+      },
+      "tags": {}
+    },
+    {
+      "type": "Microsoft.Automation/automationAccounts/schedules",
+      "apiVersion": "2015-10-31",
+      "name": "[concat(parameters('aaName'), '/', parameters('scheduleName'))]",
+      "dependsOn": [
+        "[parameters('aaName')]"
+      ],
+      "properties": {
+          "description": "[parameters('scheduleDescription')]",
+          "startTime": "[parameters('scheduleStart')]",
+          "frequency": "[parameters('scheduleFrequency')]",
+          "interval": "[parameters('scheduleInterval')]",
+          "timeZone": "[parameters('scheduleTimezone')]"
+      }
+    },
+    {
+      "type": "Microsoft.Automation/automationAccounts/jobSchedules",
+      "apiVersion": "2015-10-31",
+      "name": "[concat(parameters('runbookName'), '/', parameters('scheduleName'))]",
+      "dependsOn": [
+        "[parameters('aaName')]",
+        "[concat(parameters('aaName'), '/', parameters('runbookName'))]",
+        "[concat(parameters('aaName'), '/', parameters('scheduleName'))]"
+      ],
+      "properties": {
+        "runbook": {
+          "name": "[parameters('runbookName')]"
+        },
+        "schedule": {
+          "name": "[parameters('scheduleName')]"
+        },
+        "parameters": {
+          "VMAction": "Stop"
+        }
       }
     }
   ],
