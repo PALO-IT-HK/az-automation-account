@@ -11,6 +11,13 @@ steps:
     Invoke-ScriptAnalyzer -Path ./src -Setting PSGallery -Recurse
   displayName: Analyse scripts coding quality
 
+- task: AzureFileCopy@3
+  inputs:
+    azureSubscription: 'Pay-As-You-Go (c045ba28-d976-44b1-8556-c99c347ed5eb)'
+    Destination: 'AzureBlob'
+    storage: 'clpstoreacct'
+    ContainerName: 'runbooks'
+
 - task: PublishBuildArtifacts@1
   displayName: Publish Build Artifact for ARM Templates
   inputs:
